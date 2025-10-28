@@ -9,7 +9,7 @@ function AccountToggle() {
           gap-2 w-full items-center'>
             <img src="https://api.dicebear.com/9.x/notionists/svg?seed=JD"
              alt="Avatar Image"
-             className='size-8 rounded shrink-0 bg-violet-500 shadow' />
+             className='size-8 rounded shrink-0 bg-blue-500 shadow' />
              <div className='text-start'>
                 <span className='text-sm font-bold block'>Kelvin Waruinge</span>
                 <span className='text-xs block text-stone-400'>wark@gmail.com</span>

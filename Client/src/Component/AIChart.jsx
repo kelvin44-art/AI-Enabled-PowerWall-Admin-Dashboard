@@ -1,7 +1,9 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { FiGitBranch } from 'react-icons/fi'
 
 function AIChart() {
+  const [input, setInput] = useState()
+  
   return (
     <div className='col-span-12 p-4 rounded border border-stone-300'>
         <div className='mb-4 flex items-center justify-between'>
@@ -11,14 +13,14 @@ function AIChart() {
                 
             </h1>
         </div>
-        <div className='space-y-5'>
-                <input type="text" placeholder='How can we help you today?'
+        <form className='space-y-5'>
+                <textarea type="text" placeholder='How can we help you today?'
                  name="userInput" id="userInput" 
                  className='placeholder:text-stone-300 focus:outline-none w-full text-wrap h-auto overflow-clip' />
                  <div>
                     <button className='bg-stone-700 text-white text-sm px-3 py-1 rounded '>Analyse</button>
                  </div>
-        </div>
+        </form>
     </div>
   )
 }
