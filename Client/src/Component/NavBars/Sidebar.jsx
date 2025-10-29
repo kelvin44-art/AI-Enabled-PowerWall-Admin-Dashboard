@@ -1,8 +1,8 @@
 import React from 'react'
-import AccountToggle from './AccountToggle'
-import Searchbar from './Searchbar'
-import Router from './Router'
-import Plan from './Plan'
+import AccountToggle from '../NavbarComponents/AccountToggle'
+import Searchbar from '../Searchbar/Searchbar'
+import Router from '../NavbarComponents/Router'
+import Plan from '../NavbarComponents/Plan'
 
 function Sidebar() {
   return (

@@ -1,5 +1,6 @@
-import Grid from './Grid'
-import Topbar from './Topbar'
+import Grid from "../MainContent/Grid"
+import Topbar from "../NavBars/Topbar"
+
 
 function Dashboard() {
   return (

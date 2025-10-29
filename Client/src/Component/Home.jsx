@@ -1,6 +1,7 @@
-import React from 'react'
-import Sidebar from './Sidebar'
-import Dashboard from './Dashboard'
+
+
+import Dashboard from './DashBoard/Dashboard'
+import Sidebar from './NavBars/Sidebar'
 
 function Home() {
   return (

@@ -1,8 +1,9 @@
+import StatsCard from "../../Cards/StatsCard"
+import ActivityGrapth from "../Graphs/ActivityGrapth"
+import AIChart from "../Graphs/AIChart"
+import UsageRadar from "./UsageRadar"
 
-import ActivityGrapth from './ActivityGrapth'
-import AIChart from './AIChart'
-import StatsCard from './StatsCard'
-import UsageRadar from './UsageRadar'
+
 
 function Grid() {
   return (
