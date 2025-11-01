@@ -11,615 +11,76 @@
         bottom: 20px;
         right: 20px;
         z-index: 9999;
-        width: 400px;
-        height: 600px;
-        border: none;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        border-radius: 8px;
-        overflow: hidden;
-      }
-      
-      #watsonx-orchestrate-web-chat iframe {
-        width: 100%;
-        height: 100%;
-        border: none;
       }
     </style>
   </head>
   <body>
     <div id="root"></div>
-    <!-- Watson Orchestrate Web Chat Embed -->
-    <!-- Instance: EnergAI | Agent ID: 91fd8461-521f-476a-a66f-1399ad8e2794 -->
+    
+    <!-- Watson Orchestrate Web Chat Container -->
     <div id="watsonx-orchestrate-web-chat"></div>
-    <!-- Watson Orchestrate Authentication MUST load BEFORE React/any other scripts -->
+    
+    <!-- Watson Orchestrate Embed Script -->
     <script>
-      // CRITICAL: This script must run IMMEDIATELY, before anything else
-      console.log('🚀 [IMMEDIATE START] Watson Orchestrate authentication setup starting...');
-      console.log('   Timestamp:', new Date().toISOString());
-      console.log('   Current URL:', window.location.href);
-      console.log('   Document ready state:', document.readyState);
-      
-      // Initialize Watson Orchestrate with wxoLoader (supports authentication)
-      // Set up ALL interceptors BEFORE loading the script
       (function() {
-        console.log('🚀 [FUNCTION START] Watson Orchestrate authentication setup starting...');
-        console.log('   Timestamp:', new Date().toISOString());
-        
-        // API Key (not needed when security is disabled, but kept for future use)
-        const authToken = 'azE6dXNyXzcwZTBjZmEyLWE2MGYtMzhhMS1iODJlLThhNmExODk5NmFlYjpPYXZXZHZHajNZQTQySWRocHJ3QU43OUpmVStIVG94Ly81N1cyTFlQaXdVPTpGTHNZ';
-        
-        console.log('🔧 Setting up authentication interceptors...');
-        console.log('   Auth token length:', authToken.length);
-        console.log('   Auth token preview:', authToken.substring(0, 30) + '...');
-        
-        // 1. Intercept fetch requests FIRST
-        console.log('📝 [SETUP] Setting up fetch interceptor...');
-        try {
-          const originalFetch = window.fetch;
-          console.log('   ✅ Original fetch captured:', typeof originalFetch);
-          
-          window.fetch = function(...args) {
-            try {
-              const url = args[0];
-              const options = args[1] || {};
-              
-              if (typeof url === 'string' && url.includes('watson-orchestrate')) {
-                console.log('🌐 [FETCH] Intercepted Watson Orchestrate request:', url);
-                options.headers = options.headers || {};
-                
-                // SECURITY IS DISABLED - Remove Authorization header if present
-                if (options.headers['Authorization']) {
-                  console.log('   ⚠️ Removing Authorization header (security disabled)');
-                  delete options.headers['Authorization'];
-                }
-                
-                console.log('   Request method:', options.method || 'GET');
-                console.log('   Request headers:', Object.keys(options.headers || {}));
-                console.log('   ✅ No Authorization header (security disabled)');
-              }
-              
-              return originalFetch.apply(this, args);
-            } catch (error) {
-              console.error('❌ [FETCH INTERCEPTOR ERROR]', error);
-              return originalFetch.apply(this, args);
-            }
-          };
-          
-          console.log('   ✅ Fetch interceptor installed');
-        } catch (error) {
-          console.error('❌ [SETUP] Failed to set up fetch interceptor:', error);
-        }
-        
-        // 2. Intercept XMLHttpRequest (used by Axios) FIRST
-        console.log('📝 [SETUP] Setting up XMLHttpRequest interceptors...');
-        try {
-          const originalXHROpen = XMLHttpRequest.prototype.open;
-          const originalXHRSend = XMLHttpRequest.prototype.send;
-          const originalSetRequestHeader = XMLHttpRequest.prototype.setRequestHeader;
-          
-          console.log('   ✅ Original XHR methods captured');
-          
-          XMLHttpRequest.prototype.open = function(method, url, ...args) {
-            try {
-              this._url = url;
-              this._method = method;
-              this._watsonOrchestrate = (typeof url === 'string' && url.includes('watson-orchestrate'));
-              
-              if (this._watsonOrchestrate) {
-                console.log('📡 [XHR OPEN]', method, url);
-                console.log('   ✅ Marked as Watson Orchestrate request');
-              }
-              
-              if (!this._headers) {
-                this._headers = {};
-              }
-              return originalXHROpen.apply(this, [method, url, ...args]);
-            } catch (error) {
-              console.error('❌ [XHR OPEN ERROR]', error);
-              return originalXHROpen.apply(this, [method, url, ...args]);
-            }
-          };
-          
-          XMLHttpRequest.prototype.setRequestHeader = function(header, value) {
-            try {
-              if (!this._headers) {
-                this._headers = {};
-              }
-              
-              // SECURITY IS DISABLED - Block Authorization headers
-              if (this._watsonOrchestrate && header.toLowerCase() === 'authorization') {
-                console.log('⚠️ [XHR] Authorization header attempted but security is DISABLED');
-                console.log('   Blocking Authorization header to avoid conflicts');
-                // Don't set the header since security is disabled
-                this._headers[header.toLowerCase()] = value; // Track it but don't send
-                return; // Don't actually set the header
-              }
-              
-              this._headers[header.toLowerCase()] = value;
-              
-              if (this._watsonOrchestrate) {
-                const displayValue = value ? (value.substring(0, 50) + (value.length > 50 ? '...' : '')) : '(empty)';
-                console.log('📋 [XHR HEADER SET]', header + ':', displayValue);
-              }
-              
-              return originalSetRequestHeader.apply(this, arguments);
-            } catch (error) {
-              console.error('❌ [XHR SETHEADER ERROR]', error);
-              return originalSetRequestHeader.apply(this, arguments);
-            }
-          };
-          
-          XMLHttpRequest.prototype.send = function(...args) {
-            try {
-              if (this._watsonOrchestrate) {
-                console.log('📤 [XHR SEND]', this._method || 'UNKNOWN', this._url || 'UNKNOWN');
-                
-                // SECURITY IS DISABLED - Remove Authorization header if present
-                const authHeader = this._headers && this._headers['authorization'];
-                if (authHeader) {
-                  console.log('   ⚠️ Authorization header detected (security is disabled)');
-                  console.log('   Header value:', authHeader.substring(0, 50) + '...');
-                  console.log('   ⚠️ NOTE: Cannot remove headers after setRequestHeader is called');
-                  console.log('   ⚠️ SDK might be setting this - server should ignore it');
-                } else {
-                  console.log('   ✅ No Authorization header (security disabled - correct)');
-                }
-                
-                // Log all headers before send
-                console.log('   📋 All headers being sent:', JSON.stringify(this._headers, null, 2));
-              } else {
-                // Log non-Watson requests for debugging
-                if (this._url && typeof this._url === 'string') {
-                  console.log('📤 [XHR SEND] Non-Watson request:', this._method, this._url);
-                }
-              }
-              
-              return originalXHRSend.apply(this, args);
-            } catch (error) {
-              console.error('❌ [XHR SEND ERROR]', error);
-              console.error('   Stack:', error.stack);
-              return originalXHRSend.apply(this, args);
-            }
-          };
-          
-          console.log('   ✅ XMLHttpRequest interceptors installed');
-        } catch (error) {
-          console.error('❌ [SETUP] Failed to set up XMLHttpRequest interceptors:', error);
-          console.error('   Stack:', error.stack);
-        }
-        
-        // 3. Intercept EventTarget.dispatchEvent BEFORE script loads
-        console.log('📝 [SETUP] Setting up EventTarget.dispatchEvent interceptor...');
-        try {
-          const originalDispatchEvent = EventTarget.prototype.dispatchEvent;
-          console.log('   ✅ Original dispatchEvent captured:', typeof originalDispatchEvent);
-          
-          EventTarget.prototype.dispatchEvent = function(event) {
-            try {
-              // Log ALL events to catch authTokenNeeded - be more aggressive
-              if (event && event.type) {
-                // Log EVERY event to see what's being dispatched
-                if (event.type === 'authTokenNeeded' || 
-                    event.type.includes('auth') || 
-                    event.type.includes('token') ||
-                    event.type.includes('Auth') ||
-                    event.type.includes('Token')) {
-                  console.log('🔔 [EVENT DISPATCH] Auth-related event:', event.type);
-                  console.log('   Full event:', event);
-                  console.log('   Event.detail:', event.detail);
-                  console.log('   Event.detail.resolve:', typeof event.detail?.resolve);
-                  console.log('   Event.target:', event.target);
-                  
-                  const tokenValue = 'Bearer ' + authToken;
-                  
-                  // Set event.authToken FIRST (synchronously, before dispatch)
-                  event.authToken = tokenValue;
-                  console.log('   ✅ Set event.authToken immediately:', tokenValue.substring(0, 30) + '...');
-                  
-                  // Try resolve() if available
-                  if (event.detail && typeof event.detail.resolve === 'function') {
-                    console.log('   ✅ Calling event.detail.resolve()');
-                    try {
-                      event.detail.resolve(tokenValue);
-                      console.log('   ✅ resolve() called successfully');
-                    } catch (e) {
-                      console.error('   ❌ Error calling resolve():', e);
-                    }
-                  }
-                  
-                  // Set all possible properties
-                  if (event.detail) {
-                    event.detail.authToken = tokenValue;
-                    event.detail.token = tokenValue;
-                  }
-                  
-                  // Use defineProperty as backup
-                  try {
-                    Object.defineProperty(event, 'authToken', {
-                      value: tokenValue,
-                      writable: true,
-                      configurable: true,
-                      enumerable: true
-                    });
-                  } catch (e) {
-                    // Property might not be configurable
-                  }
-                  
-                  console.log('   ✅ All token properties set');
-                }
-              }
-              return originalDispatchEvent.apply(this, arguments);
-            } catch (error) {
-              console.error('❌ [EVENT DISPATCH ERROR]', error);
-              console.error('   Stack:', error.stack);
-              return originalDispatchEvent.apply(this, arguments);
-            }
-          };
-          
-          console.log('   ✅ EventTarget.dispatchEvent interceptor installed');
-        } catch (error) {
-          console.error('❌ [SETUP] Failed to set up EventTarget.dispatchEvent interceptor:', error);
-          console.error('   Stack:', error.stack);
-        }
-        
-        // 4. Set up global event listeners BEFORE script loads - catch ALL possible event names
-        const handleAuthTokenNeeded = function(event) {
-          console.log('🔔 [GLOBAL EVENT LISTENER] Potential auth event received');
-          console.log('   Event type:', event.type);
-          console.log('   Event.detail:', event.detail);
-          console.log('   event.detail.resolve type:', typeof event.detail?.resolve);
-          
-          const tokenValue = 'Bearer ' + authToken;
-          
-          // THE KEY: Call event.detail.resolve() with the token!
-          if (event && event.detail && typeof event.detail.resolve === 'function') {
-            console.log('   ✅ Calling event.detail.resolve() with token');
-            event.detail.resolve(tokenValue);
-            console.log('   ✅ Token resolved via event.detail.resolve()');
-          } else if (event && event.detail) {
-            // Fallback: set authToken property
-            event.detail.authToken = tokenValue;
-            console.log('   ⚠️ event.detail.resolve not found, set event.detail.authToken');
-          }
-          
-          // Also set event.authToken as fallback
-          if (event) {
-            event.authToken = tokenValue;
-            console.log('   ✅ Also set event.authToken');
+        // Configuration
+        const config = {
+          orchestrationID: "20251027-2225-5441-0060-2bc997cc28f2_20251027-2226-0773-200d-659bd8c521bf",
+          hostURL: "https://dl.watson-orchestrate.ibm.com",
+          rootElementID: "watsonx-orchestrate-web-chat",
+          showLauncher: true,
+          chatOptions: {
+            agentId: '91fd8461-521f-476a-a66f-1399ad8e2794',
+            agentEnvironmentId: '2083e8d2-53b0-424a-b085-7c84e5f8ed3c'
           }
         };
-        
-        // Register for multiple possible event names
-        ['authTokenNeeded', 'auth-token-needed', 'authtokenneeded', 'tokenNeeded'].forEach(function(eventName) {
-          window.addEventListener(eventName, handleAuthTokenNeeded, true);
-          document.addEventListener(eventName, handleAuthTokenNeeded, true);
-          console.log('   ✅ Registered listener for:', eventName);
-        });
-        
-        console.log('✅ Global authTokenNeeded event listeners registered');
-        
-        console.log('✅ All interceptors set up, loading wxoLoader...');
-        console.log('   📊 Interceptor status check:');
-        console.log('      - window.fetch intercepted:', window.fetch !== (function(){}).fetch);
-        console.log('      - XMLHttpRequest.prototype.send intercepted:', XMLHttpRequest.prototype.send.name !== 'send');
-        console.log('      - EventTarget.prototype.dispatchEvent intercepted:', EventTarget.prototype.dispatchEvent.name !== 'dispatchEvent');
-        
-        // Monitor all network requests to Watson Orchestrate
-        const monitorRequests = function() {
-          const originalOpen = XMLHttpRequest.prototype.open;
-          XMLHttpRequest.prototype.open = function(method, url, ...args) {
-            if (typeof url === 'string' && url.includes('watson-orchestrate')) {
-              this.addEventListener('loadstart', function() {
-                console.log('🔍 [REQUEST MONITOR] Request started:', method, url);
-              });
-              
-              this.addEventListener('loadend', function() {
-                console.log('🔍 [REQUEST MONITOR] Request ended:', method, url);
-                console.log('   Status:', this.status, this.statusText);
-                console.log('   Response headers:', this.getAllResponseHeaders());
-                
-                // Log response body for error status codes (401, 403, etc.)
-                if (this.status >= 400) {
-                  try {
-                    const responseText = this.responseText || '';
-                    console.log(`   ❌ ${this.status} Response body:`, responseText);
-                    if (responseText) {
-                      try {
-                        const responseJson = JSON.parse(responseText);
-                        console.log(`   ❌ ${this.status} Response JSON:`, JSON.stringify(responseJson, null, 2));
-                        
-                        // Provide helpful error message
-                        if (responseJson.message && responseJson.message.includes('orchestrate id not found')) {
-                          console.error('');
-                          console.error('═══════════════════════════════════════════════════════════');
-                          console.error('🚨 ORCHESTRATION ID NOT FOUND ERROR');
-                          console.error('═══════════════════════════════════════════════════════════');
-                          console.error('');
-                          console.error('The orchestration ID you provided does not exist or is incorrect.');
-                          console.error('');
-                          console.error('Current orchestration ID:', window.wxOConfiguration?.orchestrationID || 'NOT SET');
-                          console.error('');
-                          console.error('HOW TO FIX:');
-                          console.error('1. Go to your IBM Watson Orchestrate dashboard');
-                          console.error('2. Find your orchestration instance');
-                          console.error('3. Copy the FULL orchestration ID from the URL or settings');
-                          console.error('4. Update the orchestrationID in index.html line ~454');
-                          console.error('');
-                          console.error('The orchestration ID should look like:');
-                          console.error('  - "20251027-2226-0773-200d-659bd8c521bf" (short format)');
-                          console.error('  - OR "20251027-2225-5441-0060-2bc997cc28f2_20251027-2226-0773-200d-659bd8d521bf" (long format with underscore)');
-                          console.error('');
-                          console.error('═══════════════════════════════════════════════════════════');
-                        }
-                        
-                        // Check for 403 errors
-                        if (this.status === 403) {
-                          console.error('');
-                          console.error('═══════════════════════════════════════════════════════════');
-                          console.error('🚫 403 FORBIDDEN ERROR');
-                          console.error('═══════════════════════════════════════════════════════════');
-                          console.error('');
-                          console.error('Server returned 403 Forbidden.');
-                          console.error('');
-                          console.error('Response:', JSON.stringify(responseJson, null, 2));
-                          console.error('');
-                          console.error('Possible causes:');
-                          console.error('1. Security might still be enabled on the server');
-                          console.error('2. CORS policy might be blocking the request');
-                          console.error('3. The orchestration might have access restrictions');
-                          console.error('4. Authorization headers might be causing issues');
-                          console.error('');
-                          console.error('Since security is disabled, try:');
-                          console.error('1. Verify security is actually disabled in Watson Orchestrate dashboard');
-                          console.error('2. Check if Authorization headers are being sent unnecessarily');
-                          console.error('3. Check CORS settings in the orchestration');
-                          console.error('');
-                          console.error('═══════════════════════════════════════════════════════════');
-                        }
-                        
-                        if (responseJson.message && responseJson.message.includes('security keys are not configured')) {
-                          console.error('');
-                          console.error('═══════════════════════════════════════════════════════════');
-                          console.error('🔐 SECURITY CONFIGURATION ERROR');
-                          console.error('═══════════════════════════════════════════════════════════');
-                          console.error('');
-                          console.error('Embed security is enabled but security keys are not configured.');
-                          console.error('');
-                          console.error('YOU HAVE TWO OPTIONS:');
-                          console.error('');
-                          console.error('OPTION 1: Configure Security Keys (Recommended for Production)');
-                          console.error('1. Go to IBM Watson Orchestrate dashboard');
-                          console.error('2. Navigate to your orchestration instance');
-                          console.error('3. Go to Settings > Channels > Web Chat');
-                          console.error('4. Configure security key pairs (IBM key and Client key)');
-                          console.error('5. Copy the keys and add them to your configuration');
-                          console.error('');
-                          console.error('OPTION 2: Disable Security (For Testing Only)');
-                          console.error('1. Go to IBM Watson Orchestrate dashboard');
-                          console.error('2. Navigate to your orchestration instance');
-                          console.error('3. Go to Settings > Channels > Web Chat');
-                          console.error('4. Disable security for the web chat channel');
-                          console.error('5. Save the settings');
-                          console.error('');
-                          console.error('NOTE: Security must be configured or disabled on the SERVER SIDE');
-                          console.error('      This cannot be fixed from the client code.');
-                          console.error('');
-                          console.error('Documentation: https://developer.watson-orchestrate.ibm.com/manage/channels#embedding-web-chat');
-                          console.error('');
-                          console.error('═══════════════════════════════════════════════════════════');
-                        }
-                      } catch (e) {
-                        // Not JSON
-                      }
-                    }
-                  } catch (e) {
-                    console.log('   ⚠️ Could not read response body');
-                  }
-                }
-              });
-              
-              this.addEventListener('error', function() {
-                console.error('🔍 [REQUEST MONITOR] Request error:', method, url);
-              });
-            }
-            return originalOpen.apply(this, [method, url, ...args]);
-          };
-        };
-        
-        // Try to access actual request headers (if possible)
-        const monitorRequestHeaders = function() {
-          const originalSend = XMLHttpRequest.prototype.send;
-          XMLHttpRequest.prototype.send = function(...args) {
-            if (this._watsonOrchestrate && this._url) {
-              // Try to log what headers were actually sent
-              setTimeout(() => {
-                console.log('🔍 [REQUEST MONITOR] Headers sent for:', this._url);
-                // Note: We can't read sent headers from XHR, but we can verify our interception
-                if (this._headers) {
-                  console.log('   Our tracked headers:', this._headers);
-                }
-              }, 0);
-            }
-            return originalSend.apply(this, args);
-          };
-        };
-        
-        monitorRequests();
-        monitorRequestHeaders();
-        
+
+        // Initialize when DOM is ready
         function initWatsonChat() {
-          console.log('🔧 [INIT] Initializing Watson chat...');
-          const container = document.getElementById('watsonx-orchestrate-web-chat');
+          const container = document.getElementById(config.rootElementID);
           if (!container) {
-            console.error('❌ [INIT] Container not found: watsonx-orchestrate-web-chat');
-            console.error('   Available elements with ID:', Array.from(document.querySelectorAll('[id]')).map(el => el.id));
+            console.error('Watson chat container not found');
             return;
           }
-          console.log('   ✅ Container found');
-          
-          // Load the wxoLoader script
+
+          // Load Watson Orchestrate SDK
           const script = document.createElement('script');
-          script.src = 'https://dl.watson-orchestrate.ibm.com/wxochat/wxoLoader.js?embed=true';
+          script.src = config.hostURL + '/wxochat/wxoLoader.js?embed=true';
           script.async = true;
           
           script.onload = function() {
-            console.log('✅ [SCRIPT LOAD] wxoLoader script loaded successfully');
-            console.log('   Checking for wxoLoader object...');
-            
-            setTimeout(function() {
-              if (typeof wxoLoader !== 'undefined') {
-                console.log('✅ wxoLoader found, configuring...');
-                
-                // Set up authTokenNeeded listener IMMEDIATELY after wxoLoader loads
-                // Try multiple ways to listen for the event
-                const tokenValue = 'Bearer ' + authToken;
-                
-                // Method 1: Listen on document
-                const handleAuthEvent = function(event) {
-                  console.log('🔔 [DOCUMENT LISTENER] authTokenNeeded received');
-                  console.log('   Event:', event);
-                  console.log('   Event.detail:', event.detail);
-                  
-                  if (event.detail && typeof event.detail.resolve === 'function') {
-                    console.log('   ✅ Calling event.detail.resolve()');
-                    event.detail.resolve(tokenValue);
-                  } else if (event.detail) {
-                    console.log('   ✅ Setting event.detail.authToken');
-                    event.detail.authToken = tokenValue;
-                  }
-                  
-                  if (event.authToken === undefined) {
-                    event.authToken = tokenValue;
-                    console.log('   ✅ Setting event.authToken directly');
-                  }
-                };
-                
-                document.addEventListener('authTokenNeeded', handleAuthEvent, { capture: true, once: false });
-                window.addEventListener('authTokenNeeded', handleAuthEvent, { capture: true, once: false });
-                console.log('   ✅ Added authTokenNeeded listeners to document/window');
-                
-                // Method 2: Try on wxoLoader instance if it has event methods
-                if (wxoLoader && typeof wxoLoader.on === 'function') {
-                  wxoLoader.on('authTokenNeeded', function(event) {
-                    console.log('🔔 [WXOLOADER.ON] authTokenNeeded received');
-                    if (event.detail && typeof event.detail.resolve === 'function') {
-                      event.detail.resolve(tokenValue);
-                    } else {
-                      event.authToken = tokenValue;
-                    }
-                  });
-                  console.log('   ✅ Added wxoLoader.on("authTokenNeeded") listener');
-                }
-                
-                // Configure Watson Orchestrate
-                // NOTE: Security is DISABLED - no authentication tokens needed
-                window.wxOConfiguration = {
-                  orchestrationID: "20251027-2225-5441-0060-2bc997cc28f2_20251027-2226-0773-200d-659bd8c521bf",
-                  hostURL: "https://dl.watson-orchestrate.ibm.com",
-                  rootElementID: "watsonx-orchestrate-web-chat",
-                  chatOptions: {
-                    agentId: '91fd8461-521f-476a-a66f-1399ad8e2794',
-                    agentEnvironmentId: '2083e8d2-53b0-424a-b085-7c84e5f8ed3c',
-                  }
-                };
-                
-                console.log('   ✅ Configuration set (Security: DISABLED)');
-                console.log('   Orchestration ID:', window.wxOConfiguration.orchestrationID);
-                console.log('   Agent ID:', window.wxOConfiguration.chatOptions.agentId);
-                console.log('   Agent Environment ID:', window.wxOConfiguration.chatOptions.agentEnvironmentId);
-                
-                try {
-                  console.log('⚙️ Initializing wxoLoader...');
-                  wxoLoader.init();
-                  console.log('✅ wxoLoader.init() called successfully');
-                  console.log('   Waiting for chat widget to appear...');
-                  
-                  // Monitor for successful initialization
-                  setTimeout(function() {
-                    const container = document.getElementById('watsonx-orchestrate-web-chat');
-                    if (container && container.children.length > 0) {
-                      console.log('✅ Chat widget container has content - widget likely loaded!');
-                    } else {
-                      console.log('⏳ Chat widget container is empty - still loading...');
-                    }
-                  }, 2000);
-                } catch (error) {
-                  console.error('❌ Error initializing wxoLoader:', error);
-                  console.error('   Stack:', error.stack);
-                }
-              } else {
-                console.error('❌ wxoLoader not found');
+            if (typeof wxoLoader !== 'undefined') {
+              // Set configuration
+              window.wxOConfiguration = config;
+              
+              // Initialize
+              try {
+                wxoLoader.init();
+                console.log('Watson Orchestrate chat initialized');
+              } catch (error) {
+                console.error('Error initializing Watson chat:', error);
               }
-            }, 500);
+            } else {
+              console.error('wxoLoader not found');
+            }
           };
           
           script.onerror = function() {
-            console.error('❌ Error loading wxoLoader script');
+            console.error('Failed to load Watson Orchestrate SDK');
           };
           
           document.head.appendChild(script);
         }
-        
-        // Set up a global error handler to catch any unhandled errors
-        window.addEventListener('error', function(event) {
-          if (event.message && event.message.includes('watson-orchestrate')) {
-            console.error('🔴 [GLOBAL ERROR] Watson Orchestrate related error:', event.message);
-            console.error('   File:', event.filename, 'Line:', event.lineno);
-            console.error('   Error:', event.error);
-          }
-        });
-        
-        // Monitor for authTokenNeeded events using MutationObserver as backup
-        const observer = new MutationObserver(function(mutations) {
-          mutations.forEach(function(mutation) {
-            if (mutation.type === 'childList') {
-              mutation.addedNodes.forEach(function(node) {
-                if (node.nodeType === 1 && node.hasAttribute && node.hasAttribute('data-auth-token-needed')) {
-                  console.log('🔔 [MUTATION OBSERVER] Detected auth token needed marker');
-                }
-              });
-            }
-          });
-        });
-        
-        // Start observing
-        observer.observe(document.body, {
-          childList: true,
-          subtree: true
-        });
-        
-        // Wait for DOM to be ready
-        console.log('⏳ Waiting for DOM to be ready...');
+
+        // Wait for DOM
         if (document.readyState === 'loading') {
-          console.log('   DOM is loading, waiting for DOMContentLoaded...');
-          document.addEventListener('DOMContentLoaded', function() {
-            console.log('   ✅ DOMContentLoaded fired, initializing...');
-            initWatsonChat();
-          });
+          document.addEventListener('DOMContentLoaded', initWatsonChat);
         } else {
-          console.log('   DOM already ready, initializing in 1 second...');
-          setTimeout(function() {
-            console.log('   ⏰ Timeout fired, initializing...');
-            initWatsonChat();
-          }, 1000);
+          initWatsonChat();
         }
-        
-        console.log('🏁 [SETUP COMPLETE] All initialization code registered');
-        console.log('   Final timestamp:', new Date().toISOString());
-        
-        // Final verification - check if our interceptors are actually in place
-        setTimeout(function() {
-          console.log('🔍 [FINAL VERIFICATION] Checking interceptors...');
-          console.log('   window.fetch type:', typeof window.fetch);
-          console.log('   XMLHttpRequest.prototype.send type:', typeof XMLHttpRequest.prototype.send);
-          console.log('   EventTarget.prototype.dispatchEvent type:', typeof EventTarget.prototype.dispatchEvent);
-          
-          // Test if we can intercept a test XHR
-          const testXhr = new XMLHttpRequest();
-          console.log('   Test XHR created, has _watsonOrchestrate property:', '_watsonOrchestrate' in testXhr);
-        }, 2000);
       })();
     </script>
+    
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
