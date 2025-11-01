@@ -1,25 +1,24 @@
-import React, { useCallback, useState } from 'react'
+import React, { useContext } from 'react'
 import { FiGitBranch } from 'react-icons/fi'
+import { PowerGridContext } from '../../Context/GraphContext';
+
 
 function AIChart() {
-  const [data, setData] = useState([])
-  const [input, setInput] = useState('')
-  const [windSolar, setWindSolar] = useState('')
-  const [demandBefore, setDemandBefore] = useState('')
+  const { 
+    data, 
+    wind, 
+    solar, 
+    demandBefore, 
+    setWind, 
+    setSolar, 
+    setDemandBefore, 
+    addDataPoint 
+  } = useContext(PowerGridContext);
   
-  const handleSubmit = useCallback((e) => {
+  const handleSubmit = (e) => {
     e.preventDefault()
-    const newEntry = {
-      input: parseFloat(input), 
-      windSolar: parseFloat(windSolar), 
-      demandBefore: parseFloat(demandBefore)
-    }
-    setData(d => [...d, newEntry]) // Append to array
-    setDemandBefore('')
-    setInput('')
-    setWindSolar('')
-    
-  }, [input, demandBefore, windSolar, data]) 
+    addDataPoint()
+  }
   
   return (
     <div className='col-span-12 p-4 rounded border border-stone-300'>
@@ -45,27 +44,27 @@ function AIChart() {
           </div>
 
           <div className='flex gap-2 items-center'>
-            <label htmlFor="windSolar">Wind Solar</label>
+            <label htmlFor="solar">Solar</label>
             <input 
               type="number"
-              id="windSolar"
+              id="solar"
               step="any"
               required
-              onChange={(e) => setWindSolar(e.target.value)}
-              value={windSolar}
+              onChange={(e) => setSolar(e.target.value)}
+              value={solar}
               className='border py-1 px-2 rounded' 
             />
           </div>
 
           <div className='flex gap-2 items-center'>
-            <label htmlFor="input">Input</label>
+            <label htmlFor="wind">Wind</label>
             <input 
               type="number"
-              id="input"
+              id="wind"
               step="any"
               required
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
+              value={wind}
+              onChange={(e) => setWind(e.target.value)}
               className='border py-1 px-2 rounded' 
             />
           </div>
@@ -85,7 +84,7 @@ function AIChart() {
               {data.map((entry, index) => (
                 <div key={index} className='p-2 bg-gray-50 rounded border'>
                   <span className='text-sm'>
-                    Demand: {entry.demandBefore} | Wind/Solar: {entry.windSolar} | Input: {entry.input}
+                    Demand: {entry.demand} | Solar: {entry.solar} | Wind: {entry.wind} | Time: {entry.timestamp}
                   </span>
                 </div>
               ))}
