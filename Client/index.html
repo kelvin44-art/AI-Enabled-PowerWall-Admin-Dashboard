@@ -5,9 +5,82 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>client</title>
+    <style>
+      #watsonx-orchestrate-web-chat {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 9999;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
+    
+    <!-- Watson Orchestrate Web Chat Container -->
+    <div id="watsonx-orchestrate-web-chat"></div>
+    
+    <!-- Watson Orchestrate Embed Script -->
+    <script>
+      (function() {
+        // Configuration
+        const config = {
+          orchestrationID: "20251027-2225-5441-0060-2bc997cc28f2_20251027-2226-0773-200d-659bd8c521bf",
+          hostURL: "https://dl.watson-orchestrate.ibm.com",
+          rootElementID: "watsonx-orchestrate-web-chat",
+          showLauncher: true,
+          chatOptions: {
+            agentId: '91fd8461-521f-476a-a66f-1399ad8e2794',
+            agentEnvironmentId: '2083e8d2-53b0-424a-b085-7c84e5f8ed3c'
+          }
+        };
+
+        // Initialize when DOM is ready
+        function initWatsonChat() {
+          const container = document.getElementById(config.rootElementID);
+          if (!container) {
+            console.error('Watson chat container not found');
+            return;
+          }
+
+          // Load Watson Orchestrate SDK
+          const script = document.createElement('script');
+          script.src = config.hostURL + '/wxochat/wxoLoader.js?embed=true';
+          script.async = true;
+          
+          script.onload = function() {
+            if (typeof wxoLoader !== 'undefined') {
+              // Set configuration
+              window.wxOConfiguration = config;
+              
+              // Initialize
+              try {
+                wxoLoader.init();
+                console.log('Watson Orchestrate chat initialized');
+              } catch (error) {
+                console.error('Error initializing Watson chat:', error);
+              }
+            } else {
+              console.error('wxoLoader not found');
+            }
+          };
+          
+          script.onerror = function() {
+            console.error('Failed to load Watson Orchestrate SDK');
+          };
+          
+          document.head.appendChild(script);
+        }
+
+        // Wait for DOM
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', initWatsonChat);
+        } else {
+          initWatsonChat();
+        }
+      })();
+    </script>
+    
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
